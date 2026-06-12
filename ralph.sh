@@ -1,7 +1,7 @@
 #!/bin/bash
 # Ralph Wiggum - Long-running AI agent loop
 # Usage: ./ralph.sh [max_iterations] [cli_tool] [model] [share]
-# Supported tools: amp, opencode, mino, mimo, kilo, pi, agy, cmd, codex, copilot
+# Supported tools: amp, opencode, mino, mimo, kilo, pi, agy, cmd, codex, copilot, claude
 # Requires: bash 4+ (macOS: brew install bash)
 
 set -e
@@ -15,6 +15,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 get_tool_config() {
 	local tool="$1"
 	case "$tool" in
+		claude)
+			echo "claude||--dangerously-skip-permissions --print||||false"
+			;;
 		opencode)
 			echo "opencode run|opencode/big-pickle|-m|--agent build|export OPENCODE_PERMISSION='{\"*\": \"allow\"}'; export OPENCODE_DISABLE_AUTOCOMPACT=true||true"
 			;;
@@ -79,6 +82,7 @@ Supported tools:
   cmd         Command Code CLI
   codex       Codex CLI
   copilot     GitHub Copilot CLI
+  claude      Claude Code CLI
 
 Options:
   -h, --help       Show this help message and exit
@@ -93,6 +97,7 @@ Examples:
   ./ralph.sh 10 cmd claude-sonnet               # Command Code
   ./ralph.sh 10 codex o3                        # Codex
   ./ralph.sh 10 copilot gpt-5.2                 # Copilot
+  ./ralph.sh 10 claude                          # Claude Code
 
 Files:
   prompt-*.md       System prompts per CLI tool
