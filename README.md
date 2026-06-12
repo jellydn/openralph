@@ -4,7 +4,7 @@
 
 Ralph is an autonomous AI agent loop that runs AI coding agents repeatedly until all PRD items are complete. Each iteration is a fresh agent instance with clean context. Memory persists via git history, `progress.txt`, and `prd.json`.
 
-Supported CLI tools: [Amp](https://ampcode.com), [OpenCode](https://opencode.ai), Mino, MiMo, Kilo, [Pi](https://github.com/agentics-ai/pi), [Agy](https://agy.sh), [Command Code](https://commandcode.ai), [Codex](https://github.com/openai/codex), and [GitHub Copilot](https://docs.github.com/copilot/how-tos/copilot-cli).
+Supported CLI tools: [Amp](https://ampcode.com), [OpenCode](https://opencode.ai), Mino, MiMo, Kilo, [Pi](https://github.com/agentics-ai/pi), [Agy](https://agy.sh), [Command Code](https://commandcode.ai), [Codex](https://github.com/openai/codex), [GitHub Copilot](https://docs.github.com/copilot/how-tos/copilot-cli), and [Claude Code](https://docs.anthropic.com/en/docs/claude-code).
 
 Based on [Geoffrey Huntley's Ralph pattern](https://ghuntley.com/ralph/).
 
@@ -21,6 +21,7 @@ Based on [Geoffrey Huntley's Ralph pattern](https://ghuntley.com/ralph/).
   - [Command Code CLI](https://commandcode.ai)
   - [Codex CLI](https://github.com/openai/codex)
   - [GitHub Copilot CLI](https://docs.github.com/copilot/how-tos/copilot-cli)
+  - [Claude Code CLI](https://docs.anthropic.com/en/docs/claude-code)
 - `jq` installed (`brew install jq` on macOS)
 - A git repository for your project
 
@@ -42,11 +43,16 @@ Check usage here for OpenCode https://github.com/snarktank/ralph/pull/21
 
 ### Option 2: Install skills globally
 
-Copy the skills to your Amp config for use across all projects:
-
+For Amp:
 ```bash
 cp -r skills/prd ~/.config/amp/skills/
 cp -r skills/ralph ~/.config/amp/skills/
+```
+
+For Claude Code:
+```bash
+cp -r skills/prd ~/.claude/skills/
+cp -r skills/ralph ~/.claude/skills/
 ```
 
 ### Configure Amp auto-handoff (recommended)
@@ -102,6 +108,7 @@ This creates `prd.json` with user stories structured for autonomous execution.
 ./scripts/ralph/ralph.sh 10 cmd claude-sonnet                 # Command Code
 ./scripts/ralph/ralph.sh 10 codex o3                          # Codex
 ./scripts/ralph/ralph.sh 10 copilot gpt-5.2                   # Copilot
+./scripts/ralph/ralph.sh 10 claude                            # Claude Code
 ```
 
 Default is 10 iterations with Amp.
@@ -126,6 +133,7 @@ Ralph will:
 | `prompt-opencode.md` | Instructions for OpenCode CLI |
 | `prompt-mino.md` | Instructions for Mino/MiMo/Kilo CLI |
 | `prompt-pi.md` | Instructions for Pi CLI |
+| `CLAUDE.md` | Instructions for Claude Code |
 | `prd.json` | User stories with `passes` status (the task list) |
 | `prd.json.example` | Example PRD format for reference |
 | `progress.txt` | Append-only learnings for future iterations |
