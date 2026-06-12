@@ -4,7 +4,7 @@
 
 Ralph is an autonomous AI agent loop that runs AI coding agents repeatedly until all PRD items are complete. Each iteration is a fresh agent instance with clean context. Memory persists via git history, `progress.txt`, and `prd.json`.
 
-Supported CLI tools: [Amp](https://ampcode.com), [OpenCode](https://opencode.ai), Mino, MiMo, Kilo, and [Pi](https://github.com/agentics-ai/pi).
+Supported CLI tools: [Amp](https://ampcode.com), [OpenCode](https://opencode.ai), Mino, MiMo, Kilo, [Pi](https://github.com/agentics-ai/pi), [Agy](https://agy.sh), [Command Code](https://commandcode.ai), [Codex](https://github.com/openai/codex), and [GitHub Copilot](https://docs.github.com/copilot/how-tos/copilot-cli).
 
 Based on [Geoffrey Huntley's Ralph pattern](https://ghuntley.com/ralph/).
 
@@ -17,6 +17,10 @@ Based on [Geoffrey Huntley's Ralph pattern](https://ghuntley.com/ralph/).
   - [OpenCode CLI](https://opencode.ai)
   - Mino / MiMo / Kilo CLI
   - [Pi CLI](https://github.com/agentics-ai/pi)
+  - [Agy CLI](https://agy.sh)
+  - [Command Code CLI](https://commandcode.ai)
+  - [Codex CLI](https://github.com/openai/codex)
+  - [GitHub Copilot CLI](https://docs.github.com/copilot/how-tos/copilot-cli)
 - `jq` installed (`brew install jq` on macOS)
 - A git repository for your project
 
@@ -94,6 +98,10 @@ This creates `prd.json` with user stories structured for autonomous execution.
 ./scripts/ralph/ralph.sh 10 kilo kilo/kilo-auto true          # Kilo
 ./scripts/ralph/ralph.sh 10 pi google/gemini-2.0-flash        # Pi
 ./scripts/ralph/ralph.sh 10 pi claude-sonnet:high             # Pi with thinking
+./scripts/ralph/ralph.sh 10 agy claude-sonnet                 # Agy
+./scripts/ralph/ralph.sh 10 cmd claude-sonnet                 # Command Code
+./scripts/ralph/ralph.sh 10 codex o3                          # Codex
+./scripts/ralph/ralph.sh 10 copilot gpt-5.2                   # Copilot
 ```
 
 Default is 10 iterations with Amp.
