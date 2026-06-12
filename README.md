@@ -29,7 +29,33 @@ Based on [Geoffrey Huntley's Ralph pattern](https://ghuntley.com/ralph/).
 
 ## Setup
 
-### Option 1: Copy to your project
+### Option 1: Quick Start (Recommended)
+
+Set up a new project with Ralph in one command:
+
+```bash
+# Clone or download Ralph, then run:
+./quick-start.sh my-project-name [cli_tool]
+
+# Examples:
+./quick-start.sh my-app              # Default: amp
+./quick-start.sh my-app opencode     # With OpenCode
+./quick-start.sh my-app claude       # With Claude Code
+./quick-start.sh my-app kilo         # With Kilo
+```
+
+This will:
+1. Initialize a git repository
+2. Create a `prd.json` template
+3. Set up Ralph scripts in `scripts/ralph/`
+4. Create an initial commit
+
+Then edit `prd.json` with your feature requirements and run:
+```bash
+./scripts/ralph/ralph.sh
+```
+
+### Option 2: Copy to your project
 
 Copy the ralph files into your project:
 
@@ -43,7 +69,7 @@ chmod +x scripts/ralph/ralph.sh
 
 Check usage here for OpenCode https://github.com/snarktank/ralph/pull/21
 
-### Option 2: Install skills globally
+### Option 3: Install skills globally
 
 For Amp:
 ```bash
