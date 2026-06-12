@@ -2,7 +2,9 @@
 
 ![Ralph](ralph.webp)
 
-Ralph is an autonomous AI agent loop that runs [Amp](https://ampcode.com) repeatedly until all PRD items are complete. Each iteration is a fresh Amp instance with clean context. Memory persists via git history, `progress.txt`, and `prd.json`.
+Ralph is an autonomous AI agent loop that runs AI coding agents repeatedly until all PRD items are complete. Each iteration is a fresh agent instance with clean context. Memory persists via git history, `progress.txt`, and `prd.json`.
+
+Supported CLI tools: [Amp](https://ampcode.com), [OpenCode](https://opencode.ai), Mino, MiMo, Kilo, and [Pi](https://github.com/agentics-ai/pi).
 
 Based on [Geoffrey Huntley's Ralph pattern](https://ghuntley.com/ralph/).
 
@@ -10,7 +12,11 @@ Based on [Geoffrey Huntley's Ralph pattern](https://ghuntley.com/ralph/).
 
 ## Prerequisites
 
-- [Amp CLI](https://ampcode.com) or [OpenCode CLI](https://opencode.ai) installed and authenticated
+- One of the supported CLI tools installed and authenticated:
+  - [Amp CLI](https://ampcode.com)
+  - [OpenCode CLI](https://opencode.ai)
+  - Mino / MiMo / Kilo CLI
+  - [Pi CLI](https://github.com/agentics-ai/pi)
 - `jq` installed (`brew install jq` on macOS)
 - A git repository for your project
 
@@ -76,14 +82,26 @@ This creates `prd.json` with user stories structured for autonomous execution.
 ### 3. Run Ralph
 
 ```bash
-./scripts/ralph/ralph.sh [max_iterations]
+# Default: Amp with 10 iterations
+./scripts/ralph/ralph.sh
+
+# Specify iterations and CLI tool
+./scripts/ralph/ralph.sh [max_iterations] [cli_tool] [model] [share]
+
+# Examples:
+./scripts/ralph/ralph.sh 5 opencode                          # OpenCode
+./scripts/ralph/ralph.sh 10 mimo mimo/mimo-auto true          # MiMo
+./scripts/ralph/ralph.sh 10 kilo kilo/kilo-auto true          # Kilo
+./scripts/ralph/ralph.sh 10 pi google/gemini-2.0-flash        # Pi
+./scripts/ralph/ralph.sh 10 pi claude-sonnet:high             # Pi with thinking
 ```
 
-Default is 10 iterations.
+Default is 10 iterations with Amp.
 
 Ralph will:
 1. Create a feature branch (from PRD `branchName`)
 2. Pick the highest priority story where `passes: false`
+   - If `knownIssues` exist, prioritize stories that resolve them
 3. Implement that single story
 4. Run quality checks (typecheck, tests)
 5. Commit if checks pass
@@ -95,8 +113,11 @@ Ralph will:
 
 | File | Purpose |
 |------|---------|
-| `ralph.sh` | The bash loop that spawns fresh Amp instances |
-| `prompt.md` | Instructions given to each Amp instance |
+| `ralph.sh` | The bash loop that spawns fresh agent instances |
+| `prompt-amp.md` | Instructions for Amp CLI |
+| `prompt-opencode.md` | Instructions for OpenCode CLI |
+| `prompt-mino.md` | Instructions for Mino/MiMo/Kilo CLI |
+| `prompt-pi.md` | Instructions for Pi CLI |
 | `prd.json` | User stories with `passes` status (the task list) |
 | `prd.json.example` | Example PRD format for reference |
 | `progress.txt` | Append-only learnings for future iterations |
