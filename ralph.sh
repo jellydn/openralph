@@ -1,9 +1,9 @@
 #!/bin/bash
 # Ralph Wiggum - Long-running AI agent loop
 # Usage: ./ralph.sh [max_iterations] [cli_tool] [model] [share]
-# cli_tool: amp (default), opencode, mino, mimo, or pi
-# model: opencode model ID, amp mode (smart/rush), mimo model ID, or pi model pattern
-# share: true/false (default: false) - share session for opencode/mino/mimo
+# cli_tool: amp (default), opencode, mino, mimo, kilo, or pi
+# model: opencode model ID, amp mode (smart/rush), mimo/kilo model ID, or pi model pattern
+# share: true/false (default: false) - share session for opencode/mino/mimo/kilo
 
 set -e
 
@@ -17,9 +17,9 @@ Usage:
 
 Arguments:
   max_iterations    Number of iterations to run (default: 10)
-  cli_tool         CLI tool to use: amp (default), opencode, mino, mimo, or pi
-  model            Model ID for opencode/mimo, mode for amp (smart/rush), or pi model pattern
-  share            Share session: true/false (default: false) - only for opencode/mino/mimo
+  cli_tool         CLI tool to use: amp (default), opencode, mino, mimo, kilo, or pi
+  model            Model ID for opencode/mimo/kilo, mode for amp (smart/rush), or pi model pattern
+  share            Share session: true/false (default: false) - only for opencode/mino/mimo/kilo
 
 Options:
   -h, --help       Show this help message and exit
@@ -36,6 +36,9 @@ Examples:
 
   # Run with mimo
   ./ralph.sh 20 mimo mimo/mimo-auto true
+
+  # Run with kilo
+  ./ralph.sh 20 kilo kilo/kilo-auto true
 
   # Run with pi (uses --model flag)
   ./ralph.sh 10 pi google/gemini-2.0-flash
@@ -71,8 +74,8 @@ SHARE=${4:-false}
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROMPT_FILE="$SCRIPT_DIR/prompt-$CLI_TOOL.md"
 
-# mimo uses the same prompt contract as mino unless a dedicated prompt exists.
-if [ "$CLI_TOOL" = "mimo" ] && [ ! -f "$PROMPT_FILE" ]; then
+# mimo and kilo use the same prompt contract as mino unless a dedicated prompt exists.
+if ([ "$CLI_TOOL" = "mimo" ] || [ "$CLI_TOOL" = "kilo" ]) && [ ! -f "$PROMPT_FILE" ]; then
 	PROMPT_FILE="$SCRIPT_DIR/prompt-mino.md"
 fi
 
@@ -80,7 +83,7 @@ fi
 if [ "$CLI_TOOL" = "opencode" ]; then
 	export OPENCODE_PERMISSION='{"*": "allow"}'
 	export OPENCODE_DISABLE_AUTOCOMPACT=true
-elif [ "$CLI_TOOL" = "mino" ] || [ "$CLI_TOOL" = "mimo" ]; then
+elif [ "$CLI_TOOL" = "mino" ] || [ "$CLI_TOOL" = "mimo" ] || [ "$CLI_TOOL" = "kilo" ]; then
 	export MINO_PERMISSION='{"*": "allow"}'
 	export MINO_DISABLE_AUTOCOMPACT=true
 fi
@@ -141,7 +144,7 @@ if [ -n "$MODEL" ]; then
 else
 	echo "Using CLI: $CLI_TOOL (default model)"
 fi
-if [ "$CLI_TOOL" = "opencode" ] || [ "$CLI_TOOL" = "mino" ] || [ "$CLI_TOOL" = "mimo" ]; then
+if [ "$CLI_TOOL" = "opencode" ] || [ "$CLI_TOOL" = "mino" ] || [ "$CLI_TOOL" = "mimo" ] || [ "$CLI_TOOL" = "kilo" ]; then
 	echo "Share session: $SHARE"
 fi
 
@@ -172,6 +175,13 @@ for i in $(seq 1 $MAX_ITERATIONS); do
 			OUTPUT=$(cat "$PROMPT_FILE" | mimo run -m "$MIMO_MODEL" --agent build --share - 2>&1 | tee /dev/stderr) || true
 		else
 			OUTPUT=$(cat "$PROMPT_FILE" | mimo run -m "$MIMO_MODEL" --agent build - 2>&1 | tee /dev/stderr) || true
+		fi
+	elif [ "$CLI_TOOL" = "kilo" ]; then
+		KILO_MODEL=${MODEL:-kilo/kilo-auto}
+		if [ "$SHARE" = "true" ]; then
+			OUTPUT=$(cat "$PROMPT_FILE" | kilo run -m "$KILO_MODEL" --agent build --share - 2>&1 | tee /dev/stderr) || true
+		else
+			OUTPUT=$(cat "$PROMPT_FILE" | kilo run -m "$KILO_MODEL" --agent build - 2>&1 | tee /dev/stderr) || true
 		fi
 	elif [ "$CLI_TOOL" = "pi" ]; then
 		# pi uses --model pattern and supports thinking levels via :suffix
