@@ -4,7 +4,7 @@
 
 Ralph is an autonomous AI agent loop that runs AI coding agents repeatedly until all PRD items are complete. Each iteration is a fresh agent instance with clean context. Memory persists via git history, `progress.txt`, and `prd.json`.
 
-Supported CLI tools: [Amp](https://ampcode.com), [OpenCode](https://opencode.ai), Mino, [MiMo Code](https://github.com/XiaomiMiMo/MiMo-Code), [Kilo](https://github.com/Kilo-Org/kilocode), [Pi](https://github.com/agentics-ai/pi), [Agy](https://agy.sh), [Command Code](https://commandcode.ai), [Codex](https://github.com/openai/codex), [GitHub Copilot](https://docs.github.com/copilot/how-tos/copilot-cli), and [Claude Code](https://docs.anthropic.com/en/docs/claude-code).
+Supported CLI tools: [Amp](https://ampcode.com), [OpenCode](https://opencode.ai), [MiMo Code](https://github.com/XiaomiMiMo/MiMo-Code), [Kilo](https://github.com/Kilo-Org/kilocode), [Pi](https://github.com/agentics-ai/pi), [Agy](https://agy.sh), [Command Code](https://commandcode.ai), [Codex](https://github.com/openai/codex), [GitHub Copilot](https://docs.github.com/copilot/how-tos/copilot-cli), and [Claude Code](https://docs.anthropic.com/en/docs/claude-code).
 
 Based on [Geoffrey Huntley's Ralph pattern](https://ghuntley.com/ralph/).
 
@@ -15,7 +15,6 @@ Based on [Geoffrey Huntley's Ralph pattern](https://ghuntley.com/ralph/).
 - One of the supported CLI tools installed and authenticated:
   - [Amp CLI](https://ampcode.com)
   - [OpenCode CLI](https://opencode.ai)
-  - Mino CLI
   - [MiMo Code CLI](https://github.com/XiaomiMiMo/MiMo-Code) (`npm install -g @mimo-ai/cli`)
   - [Kilo CLI](https://github.com/Kilo-Org/kilocode) (`npm install -g @kilocode/cli`)
   - [Pi CLI](https://github.com/agentics-ai/pi)
@@ -159,7 +158,7 @@ Ralph will:
 | `ralph.sh` | The bash loop that spawns fresh agent instances |
 | `prompt-amp.md` | Instructions for Amp CLI |
 | `prompt-opencode.md` | Instructions for OpenCode CLI |
-| `prompt-mino.md` | Instructions for Mino/MiMo/Kilo CLI |
+| `prompt-mino.md` | Instructions for MiMo/Kilo CLI |
 | `prompt-pi.md` | Instructions for Pi CLI |
 | `CLAUDE.md` | Instructions for Claude Code |
 | `prd.json` | User stories with `passes` status (the task list) |

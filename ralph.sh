@@ -1,7 +1,7 @@
 #!/bin/bash
 # Ralph Wiggum - Long-running AI agent loop
 # Usage: ./ralph.sh [max_iterations] [cli_tool] [model] [share]
-# Supported tools: amp, opencode, mino, mimo, kilo, pi, agy, cmd, codex, copilot, claude
+# Supported tools: amp, opencode, mimo, kilo, pi, agy, cmd, codex, copilot, claude
 # Requires: bash 4+ (macOS: brew install bash)
 
 set -e
@@ -20,9 +20,6 @@ get_tool_config() {
 			;;
 		opencode)
 			echo "opencode run|opencode/big-pickle|-m|--agent build|export OPENCODE_PERMISSION='{\"*\": \"allow\"}'; export OPENCODE_DISABLE_AUTOCOMPACT=true||true"
-			;;
-		mino)
-			echo "mino run|opencode/big-pickle|-m|--agent build|export MINO_PERMISSION='{\"*\": \"allow\"}'; export MINO_DISABLE_AUTOCOMPACT=true||true"
 			;;
 		mimo)
 			echo "mimo run|mimo/mimo-auto|-m|--agent build|export MINO_PERMISSION='{\"*\": \"allow\"}'; export MINO_DISABLE_AUTOCOMPACT=true|prompt-mino.md|true"
@@ -74,8 +71,7 @@ Arguments:
 Supported tools:
   amp         Amp CLI (default)
   opencode    OpenCode CLI
-  mino        Mino CLI
-  mimo        MiMo CLI
+  mimo        MiMo Code CLI
   kilo        Kilo CLI
   pi          Pi CLI
   agy         Agy CLI
