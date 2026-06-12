@@ -1,8 +1,8 @@
 #!/bin/bash
 # Ralph Wiggum - Long-running AI agent loop
 # Usage: ./ralph.sh [max_iterations] [cli_tool] [model] [share]
-# cli_tool: amp (default), opencode, mino, mimo, kilo, or pi
-# model: opencode model ID, amp mode (smart/rush), mimo/kilo model ID, or pi model pattern
+# cli_tool: amp (default), opencode, mino, mimo, kilo, pi, agy, cmd, codex, or copilot
+# model: opencode model ID, amp mode (smart/rush), mimo/kilo model ID, or pi/agy/cmd/codex/copilot model pattern
 # share: true/false (default: false) - share session for opencode/mino/mimo/kilo
 
 set -e
@@ -17,8 +17,8 @@ Usage:
 
 Arguments:
   max_iterations    Number of iterations to run (default: 10)
-  cli_tool         CLI tool to use: amp (default), opencode, mino, mimo, kilo, or pi
-  model            Model ID for opencode/mimo/kilo, mode for amp (smart/rush), or pi model pattern
+  cli_tool         CLI tool to use: amp (default), opencode, mino, mimo, kilo, pi, agy, cmd, codex, or copilot
+  model            Model ID for opencode/mimo/kilo, mode for amp (smart/rush), or pi/agy/cmd/codex/copilot model pattern
   share            Share session: true/false (default: false) - only for opencode/mino/mimo/kilo
 
 Options:
@@ -45,6 +45,18 @@ Examples:
 
   # Run pi with thinking level
   ./ralph.sh 10 pi claude-sonnet:high
+
+  # Run with agy
+  ./ralph.sh 10 agy claude-sonnet
+
+  # Run with cmd (Command Code)
+  ./ralph.sh 10 cmd claude-sonnet
+
+  # Run with codex (Codex CLI)
+  ./ralph.sh 10 codex o3
+
+  # Run with copilot (GitHub Copilot CLI)
+  ./ralph.sh 10 copilot gpt-5.2
 
 Files:
   prompt-amp.md       - System prompt for amp CLI
@@ -92,6 +104,8 @@ fi
 if [ "$CLI_TOOL" = "pi" ]; then
 	export PI_PERMISSION='{"*": "allow"}'
 fi
+
+# agy uses --dangerously-skip-permissions flag (no env var)
 
 PRD_FILE="$SCRIPT_DIR/prd.json"
 PROGRESS_FILE="$SCRIPT_DIR/progress.txt"
@@ -189,6 +203,34 @@ for i in $(seq 1 $MAX_ITERATIONS); do
 			OUTPUT=$(cat "$PROMPT_FILE" | pi --model "$MODEL" -p 2>&1 | tee /dev/stderr) || true
 		else
 			OUTPUT=$(cat "$PROMPT_FILE" | pi -p 2>&1 | tee /dev/stderr) || true
+		fi
+	elif [ "$CLI_TOOL" = "agy" ]; then
+		# agy uses --model and --print flags with --dangerously-skip-permissions
+		if [ -n "$MODEL" ]; then
+			OUTPUT=$(cat "$PROMPT_FILE" | agy --model "$MODEL" --print --dangerously-skip-permissions 2>&1 | tee /dev/stderr) || true
+		else
+			OUTPUT=$(cat "$PROMPT_FILE" | agy --print --dangerously-skip-permissions 2>&1 | tee /dev/stderr) || true
+		fi
+	elif [ "$CLI_TOOL" = "cmd" ]; then
+		# cmd (Command Code) uses --model, --print, and --yolo flags
+		if [ -n "$MODEL" ]; then
+			OUTPUT=$(cat "$PROMPT_FILE" | cmd --model "$MODEL" --print --yolo --skip-onboarding 2>&1 | tee /dev/stderr) || true
+		else
+			OUTPUT=$(cat "$PROMPT_FILE" | cmd --print --yolo --skip-onboarding 2>&1 | tee /dev/stderr) || true
+		fi
+	elif [ "$CLI_TOOL" = "codex" ]; then
+		# codex uses exec subcommand with --model and --dangerously-bypass-approvals-and-sandbox
+		if [ -n "$MODEL" ]; then
+			OUTPUT=$(cat "$PROMPT_FILE" | codex exec -m "$MODEL" --dangerously-bypass-approvals-and-sandbox - 2>&1 | tee /dev/stderr) || true
+		else
+			OUTPUT=$(cat "$PROMPT_FILE" | codex exec --dangerously-bypass-approvals-and-sandbox - 2>&1 | tee /dev/stderr) || true
+		fi
+	elif [ "$CLI_TOOL" = "copilot" ]; then
+		# copilot uses --model, --prompt, and --yolo flags for non-interactive mode
+		if [ -n "$MODEL" ]; then
+			OUTPUT=$(cat "$PROMPT_FILE" | copilot --model "$MODEL" -p "$(cat)" --yolo -s 2>&1 | tee /dev/stderr) || true
+		else
+			OUTPUT=$(cat "$PROMPT_FILE" | copilot -p "$(cat)" --yolo -s 2>&1 | tee /dev/stderr) || true
 		fi
 	else
 		if [ -n "$MODEL" ]; then
