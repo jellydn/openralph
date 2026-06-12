@@ -1,11 +1,68 @@
 #!/bin/bash
 # Ralph Wiggum - Long-running AI agent loop
 # Usage: ./ralph.sh [max_iterations] [cli_tool] [model] [share]
-# cli_tool: amp (default) or opencode
-# model: opencode model ID or amp mode (smart/rush)
-# share: true/false (default: false) - share session for opencode
+# cli_tool: amp (default), opencode, mino, mimo, or pi
+# model: opencode model ID, amp mode (smart/rush), mimo model ID, or pi model pattern
+# share: true/false (default: false) - share session for opencode/mino/mimo
 
 set -e
+
+# Show help
+show_help() {
+	cat << 'EOF'
+Ralph Wiggum - Long-running AI agent loop for EchoNote
+
+Usage:
+  ./ralph.sh [max_iterations] [cli_tool] [model] [share]
+
+Arguments:
+  max_iterations    Number of iterations to run (default: 10)
+  cli_tool         CLI tool to use: amp (default), opencode, mino, mimo, or pi
+  model            Model ID for opencode/mimo, mode for amp (smart/rush), or pi model pattern
+  share            Share session: true/false (default: false) - only for opencode/mino/mimo
+
+Options:
+  -h, --help       Show this help message and exit
+
+Examples:
+  # Run with defaults (amp, 10 iterations)
+  ./ralph.sh
+
+  # Run 5 iterations with opencode, mino, or mimo
+  ./ralph.sh 5 opencode
+
+  # Run with specific model
+  ./ralph.sh 10 opencode opencode/big-pickle true
+
+  # Run with mimo
+  ./ralph.sh 20 mimo mimo/mimo-auto true
+
+  # Run with pi (uses --model flag)
+  ./ralph.sh 10 pi google/gemini-2.0-flash
+
+  # Run pi with thinking level
+  ./ralph.sh 10 pi claude-sonnet:high
+
+Files:
+  prompt-amp.md       - System prompt for amp CLI
+  prompt-opencode.md  - System prompt for opencode CLI
+  prompt-mino.md       - System prompt for mino CLI
+  prompt-pi.md        - System prompt for pi CLI
+  prd.json            - Product requirements in Ralph format
+  progress.txt        - Progress log of completed stories
+
+Completion Signal:
+  Ralph stops when the agent outputs: <promise>COMPLETE</promise>
+EOF
+}
+
+# Parse arguments for --help before positional args
+for arg in "$@"; do
+	if [ "$arg" = "--help" ] || [ "$arg" = "-h" ]; then
+		show_help
+		exit 0
+	fi
+done
 
 MAX_ITERATIONS=${1:-10}
 CLI_TOOL=${2:-amp}
@@ -14,10 +71,23 @@ SHARE=${4:-false}
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROMPT_FILE="$SCRIPT_DIR/prompt-$CLI_TOOL.md"
 
-# Set opencode permissions via environment variable (equivalent to --dangerously-allow-all)
+# mimo uses the same prompt contract as mino unless a dedicated prompt exists.
+if [ "$CLI_TOOL" = "mimo" ] && [ ! -f "$PROMPT_FILE" ]; then
+	PROMPT_FILE="$SCRIPT_DIR/prompt-mino.md"
+fi
+
+# Set opencode/mino/mimo permissions via environment variable (equivalent to --dangerously-allow-all)
 if [ "$CLI_TOOL" = "opencode" ]; then
 	export OPENCODE_PERMISSION='{"*": "allow"}'
 	export OPENCODE_DISABLE_AUTOCOMPACT=true
+elif [ "$CLI_TOOL" = "mino" ] || [ "$CLI_TOOL" = "mimo" ]; then
+	export MINO_PERMISSION='{"*": "allow"}'
+	export MINO_DISABLE_AUTOCOMPACT=true
+fi
+
+# Set pi permissions via environment variable (equivalent to --dangerously-allow-all)
+if [ "$CLI_TOOL" = "pi" ]; then
+	export PI_PERMISSION='{"*": "allow"}'
 fi
 
 PRD_FILE="$SCRIPT_DIR/prd.json"
@@ -71,7 +141,7 @@ if [ -n "$MODEL" ]; then
 else
 	echo "Using CLI: $CLI_TOOL (default model)"
 fi
-if [ "$CLI_TOOL" = "opencode" ]; then
+if [ "$CLI_TOOL" = "opencode" ] || [ "$CLI_TOOL" = "mino" ] || [ "$CLI_TOOL" = "mimo" ]; then
 	echo "Share session: $SHARE"
 fi
 
@@ -81,13 +151,34 @@ for i in $(seq 1 $MAX_ITERATIONS); do
 	echo "  Ralph Iteration $i of $MAX_ITERATIONS"
 	echo "═══════════════════════════════════════════════════════"
 
-	# Run amp or opencode with the ralph prompt
+	# Run amp, opencode, mino, mimo, or pi with the ralph prompt
 	if [ "$CLI_TOOL" = "opencode" ]; then
 		OPENCODE_MODEL=${MODEL:-opencode/big-pickle}
 		if [ "$SHARE" = "true" ]; then
 			OUTPUT=$(cat "$PROMPT_FILE" | opencode run -m "$OPENCODE_MODEL" --agent build --share - 2>&1 | tee /dev/stderr) || true
 		else
 			OUTPUT=$(cat "$PROMPT_FILE" | opencode run -m "$OPENCODE_MODEL" --agent build - 2>&1 | tee /dev/stderr) || true
+		fi
+	elif [ "$CLI_TOOL" = "mino" ]; then
+		MINO_MODEL=${MODEL:-opencode/big-pickle}
+		if [ "$SHARE" = "true" ]; then
+			OUTPUT=$(cat "$PROMPT_FILE" | mino run -m "$MINO_MODEL" --agent build --share - 2>&1 | tee /dev/stderr) || true
+		else
+			OUTPUT=$(cat "$PROMPT_FILE" | mino run -m "$MINO_MODEL" --agent build - 2>&1 | tee /dev/stderr) || true
+		fi
+	elif [ "$CLI_TOOL" = "mimo" ]; then
+		MIMO_MODEL=${MODEL:-mimo/mimo-auto}
+		if [ "$SHARE" = "true" ]; then
+			OUTPUT=$(cat "$PROMPT_FILE" | mimo run -m "$MIMO_MODEL" --agent build --share - 2>&1 | tee /dev/stderr) || true
+		else
+			OUTPUT=$(cat "$PROMPT_FILE" | mimo run -m "$MIMO_MODEL" --agent build - 2>&1 | tee /dev/stderr) || true
+		fi
+	elif [ "$CLI_TOOL" = "pi" ]; then
+		# pi uses --model pattern and supports thinking levels via :suffix
+		if [ -n "$MODEL" ]; then
+			OUTPUT=$(cat "$PROMPT_FILE" | pi --model "$MODEL" -p 2>&1 | tee /dev/stderr) || true
+		else
+			OUTPUT=$(cat "$PROMPT_FILE" | pi -p 2>&1 | tee /dev/stderr) || true
 		fi
 	else
 		if [ -n "$MODEL" ]; then
